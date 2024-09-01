@@ -1,9 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { Request } from 'express';
+import { AuthGuard } from 'src/modules/auth/auth/guards/auth.guard';
 
 @Controller('user')
+@UseGuards(AuthGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
@@ -16,6 +19,13 @@ export class UserController {
   findAll() {
     return this.userService.findAll();
   }
+
+
+  @Get('/profile')
+  profile(@Req() request: Request) {
+    return request.user
+  }
+
 
   @Get(':id')
   findOne(@Param('id') id: string) {
