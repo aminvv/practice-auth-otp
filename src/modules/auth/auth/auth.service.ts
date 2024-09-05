@@ -3,10 +3,12 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { OtpEntity } from 'src/modules/user/user/entities/otp.entity';
 import { UserEntity } from 'src/modules/user/user/entities/user.entity';
 import { Repository } from 'typeorm';
-import { CheckOtpDto, SendOtpDto } from './dto/auth.dto';
+import { CheckOtpDto, SendOtpDto } from './dto/otp.dto';
 import { randomInt } from 'crypto';import { TokenPayload } from './types/payload';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { signupDto } from './dto/base.dto';
+import { hashSync } from 'bcrypt';
 ``
 
 @Injectable()
@@ -131,6 +133,32 @@ export class AuthService {
             throw new UnauthorizedException(" login on your account ")
             
         }
+    }
+
+
+    async signup(signupDto:signupDto){
+        const {email,first_name,last_name,mobile,password,}=signupDto
+        const emailUser=await this.userRepository.findOneBy( {  email } )
+        const mobileUser=await this.userRepository.findOneBy({mobile})
+        if(emailUser ){
+            return {message:"email is already exist "}
+        }
+
+        if(  mobileUser){
+            return {message:"mobile is already exist "}
+        }
+
+        const hashPassword=hashSync(password,12)
+
+        const user=this.userRepository.create({
+            email,
+            mobile,
+            last_name,
+            first_name,
+            password:hashPassword
+        })
+        await this.userRepository.save(user)
+        return "signup successfully"
     }
 
 

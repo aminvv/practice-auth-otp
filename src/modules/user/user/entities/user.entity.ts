@@ -17,8 +17,16 @@ last_name:string
 @Column()
 mobile:string
 
+
+@Column({nullable:true})
+password:string
+
+@Column({nullable:true})
+email:string
+
 @Column({default:false})
 mobile_verify:boolean
+
 
 @CreateDateColumn()
 create_at:Date
