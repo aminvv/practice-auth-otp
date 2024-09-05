@@ -7,8 +7,8 @@ import { CheckOtpDto, SendOtpDto } from './dto/otp.dto';
 import { randomInt } from 'crypto';import { TokenPayload } from './types/payload';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { signupDto } from './dto/base.dto';
-import { hashSync } from 'bcrypt';
+import { loginDto, signupDto } from './dto/base.dto';
+import { compareSync, hashSync } from 'bcrypt';
 ``
 
 @Injectable()
@@ -113,7 +113,7 @@ export class AuthService {
 
     async validationAccessToken(token:string){
         try {
-            const payload=this.jwtService.verify<TokenPayload>(token,{
+            const payload=this.jwtService.verify<TokenPayload>( token,{
                 secret:this.configService.get("Jwt.accessToken")
             })
 
@@ -161,6 +161,27 @@ export class AuthService {
         return "signup successfully"
     }
 
+
+
+    async login(loginDto:loginDto){
+        const{email,password}=loginDto
+        const user=await this.userRepository.findOneBy({email})
+        if(!user){
+            return {message:"username or password  is incorrect"}
+        }
+        if(!compareSync(password,user.password)){
+            return {message:"username or password  is incorrect"}            
+        }
+
+        const{accessToken,refreshToken}=this.makeTokenForUser({mobile:user.mobile,id:user.id})
+        return {
+            accessToken,
+            refreshToken,
+            message:" you logged in successfully"
+        }
+
+
+    } 
 
     
 
